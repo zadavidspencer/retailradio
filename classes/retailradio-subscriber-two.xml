@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jbossts="http://www.mulesoft.org/schema/mule/jbossts" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/jbossts http://www.mulesoft.org/schema/mule/jbossts/current/mule-jbossts.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <jms:activemq-connector name="Active_MQ_StoreTwo" username="admin" password="admin" brokerURL="tcp://localhost:61616" validateConnections="true" clientId="StoreTwo" durable="true" persistentDelivery="true" doc:name="Active MQ" specification="1.1"/>
+    <flow name="retailradio-subscriber-twoFlow">
+            <jms:inbound-endpoint topic="RetailRadio.UpNext" connector-ref="Active_MQ_StoreTwo" doc:name="JMS">
+            <jms:transaction action="BEGIN_OR_JOIN"/>
+        </jms:inbound-endpoint>
+        <file:outbound-endpoint path="${app.home}/classes/webapps/StoreTwo" responseTimeout="10000" doc:name="File" outputPattern="#[sessionVars['OriginalFileName']]"/>
+        <parse-template location="src/main/resources/file.json" doc:name="Parse Template"/>
+        <logger message="--- payload for json --- #[payload]" level="DEBUG" doc:name="Logger"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+        <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/UpNextList/{storeId}" method="POST" metadata:id="874aa174-c4f7-40e6-9223-9e8a2aca7f09" doc:name="HTTP">
+            <http:request-builder>
+                <http:uri-param paramName="storeId" value="2"/>
+            </http:request-builder>
+        </http:request>
+        <catch-exception-strategy doc:name="Catch Exception Strategy">
+            <logger message="-- StoreTwo Error Posting File to Service --#[payload]" level="INFO" doc:name="Logger"/>
+        </catch-exception-strategy>
+      </flow>
+</mule>

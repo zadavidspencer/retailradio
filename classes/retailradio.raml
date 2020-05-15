@@ -1,0 +1,43 @@
+#%RAML 0.8
+title: RetailRadio API
+version: v1
+protocols: [ HTTP, HTTPS ]
+baseUri: http://retailradio.com/api/v1
+mediaType: application/json
+documentation:
+ - title: Home
+   content: |
+     Welcome to the _Retail Radio API_ Documentation. The _Retail Radio API_
+     allows you to add to the UpNext Playlist, and retrieving the current playlist.
+     The  _Retail Radio API_ support basic authentication and access is provided on request.
+securitySchemes:
+  - basic:
+      description: |
+        RetailRadio API supports basic authentication for authenticating all API requests.
+      type: Basic Authentication
+/UpNextList/{storeId}:
+ get:
+      securedBy: [basic]
+      description: for the particular store retrieve the latest UpNextList
+      responses:
+        200:
+          body:
+            application/json:
+ post:
+   securedBy: [basic]
+   description: when a file is received at the store, add to the upnext list service
+   body:
+     application/json:
+                 schema: |
+                   {
+                     "type": "object",
+                     "$schema": "http://json-schema.org/draft-03/schema",
+                     "id": "http://jsonschema.net",
+                     "required": true,
+                     "properties": {
+                       "filename": {
+                         "type": "string",
+                         "required": true
+                       }
+                     }
+                   }

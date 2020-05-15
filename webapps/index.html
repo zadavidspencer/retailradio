@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>RetailRadio</title>	
+	
+	<script src="js/jquery.js"></script>	
+	<script src="js/mediaelement-and-player.min.js"></script>	
+	<link rel="stylesheet" href="css/mediaelementplayer.min.css" />
+	<style>
+    .mejs-list li:hover {
+        background: #ffa;
+        cursor: pointer;
+    }
+    .mejs-list li.current {
+        background: #cddfff;
+    }
+</style>
+<script>
+          
+    $(function(){
+        $('video,audio').mediaelementplayer({
+            success: function (mediaElement, domObject) {
+                mediaElement.addEventListener('ended', function (e) {
+                    mejsPlayNext(e.target);
+                }, false);
+            },
+            keyActions: []
+        });
+
+        $('.mejs-list li').click(function() {
+            $(this).addClass('current').siblings().removeClass('current');
+            var audio_src = $(this).text();
+            $('audio#mejs:first').each(function(){
+                this.player.pause();
+                this.player.setSrc(audio_src);
+                this.player.play();
+            });
+        });
+        
+
+        $('#storeOne').click(function() {
+        	$('#mejs-list').html('');
+        	var output='';
+            $.getJSON('http://127.0.0.1:8081/api/UpNextList/1', function(data) {
+                console.log(data);
+             // iterate thru the json
+                $.each(data, function(i,item){
+
+                	output = output + '<li>StoreOne/' + item.fileName + '</li>' 
+                	console.log(item.fileName);
+    
+
+
+                })
+                
+                
+	
+            $('#mejs-list').html(output);
+	        $('.mejs-list li').click(function() {
+	            $(this).addClass('current').siblings().removeClass('current');
+	            var audio_src = $(this).text();
+	            $('audio#mejs:first').each(function(){
+	                this.player.pause();
+	                this.player.setSrc(audio_src);
+	                this.player.play();
+	            });
+	        });
+        });
+        });
+        $('#storeTwo').click(function() {
+        	$('#mejs-list').html('');
+        	var output='';
+            $.getJSON('http://127.0.0.1:8081/api/UpNextList/2', function(data) {
+                console.log(data);
+             // iterate thru the json
+                $.each(data, function(i,item){
+
+                	output = output + '<li>StoreTwo/' + item.fileName + '</li>' 
+                	console.log(item.fileName);
+    
+
+
+                })
+	
+            $('#mejs-list').html(output);
+	        $('.mejs-list li').click(function() {
+	            $(this).addClass('current').siblings().removeClass('current');
+	            var audio_src = $(this).text();
+	            $('audio#mejs:first').each(function(){
+	                this.player.pause();
+	                this.player.setSrc(audio_src);
+	                this.player.play();
+	            });
+	        });
+        });
+        });
+        $('#storeThree').click(function() {
+        	$('#mejs-list').html('');
+        	var output='';
+            $.getJSON('http://127.0.0.1:8081/api/UpNextList/3', function(data) {
+                console.log(data);
+             // iterate thru the json
+                $.each(data, function(i,item){
+
+                	output = output + '<li><li>StoreThree/' + item.fileName + '</li>' 
+                	console.log(item.fileName);
+    
+
+
+                })
+	
+            $('#mejs-list').html('');
+            $('#mejs-list').html(output);
+	        $('.mejs-list li').click(function() {
+	            $(this).addClass('current').siblings().removeClass('current');
+	            var audio_src = $(this).text();
+	            $('audio#mejs:first').each(function(){
+	                this.player.pause();
+	                this.player.setSrc(audio_src);
+	                this.player.play();
+	            });
+	        });
+        });
+        });
+ 
+ 
+
+    });
+    
+
+    function mejsPlayNext(currentPlayer) {
+        if ($('.mejs-list li.current').length > 0){ // get the .current song
+            var current_item = $('.mejs-list li.current:first'); // :first is added if we have few .current classes
+            var audio_src = $(current_item).next().text();
+            $(current_item).next().addClass('current').siblings().removeClass('current');
+            console.log('if '+audio_src);
+        }else{ // if there is no .current class
+            var current_item = $('.mejs-list li:first'); // get :first if we don't have .current class
+            var audio_src = $(current_item).next().text();
+            $(current_item).next().addClass('current').siblings().removeClass('current');
+            console.log('elseif '+audio_src);
+        }
+
+        if( $(current_item).is(':last-child') ) { // if it is last - stop playing
+            $(current_item).removeClass('current');
+        }else{
+            currentPlayer.setSrc(audio_src);
+            currentPlayer.play();
+        }
+    }
+    
+    
+    
+</script>
+</head>
+<body>
+<table width="800px">
+	<tr>
+		<td colspan="3" align="center" valign="middle">Retail Radio</td>
+	</tr>
+	<tr>
+		<td><input id="storeOne" type="button" value="UpNext Store One" /></td>
+		<td><input id="storeTwo" type="button" value="UpNext Store Two" /></td>
+		<td><input id="storeThree" type="button" value="UpNext Store Three" /></td>
+	<tr>
+	<tr>
+		<td colspan="3" align="center" valign="middle">
+			<audio id="mejs" src="media/firekills.mp3" type="audio/mp3" controls="controls"></audio>
+		</td>
+	<tr>
+	<tr>
+		<td colspan="3"><ul id="mejs-list" class="mejs-list"></ul></td>
+	</tr>
+	<tr>
+		<td colspan="3"><div id="result"></div></td>
+	</tr>
+</table>
+<script>
+var player = new MediaElementPlayer('#mejs');
+
+player.pause();
+player.setSrc('media/firekills.mp3');
+player.play();
+
+
+
+
+</script>
+
+</body>
+</html>

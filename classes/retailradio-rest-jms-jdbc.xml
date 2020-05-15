@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <jms:activemq-connector name="Active_MQ" username="${activemq.username}" password="${activemq.password}" brokerURL="${activemq.brokerURL}" validateConnections="true" durable="true" doc:name="Active MQ" clientId="HeadOffice" specification="1.1"/>
+    <flow name="retailradio-rest-jms-jdbcFlow">
+        <file:inbound-endpoint path="${jms.UpNextFolder}" responseTimeout="10000" doc:name="File"/>
+         <set-session-variable variableName="OriginalFileName" value="#[message.inboundProperties.originalFilename]" doc:name="Session Variable" />
+        <file:file-to-byte-array-transformer doc:name="File to Byte Array"/>
+        <jms:outbound-endpoint topic="RetailRadio.UpNext" connector-ref="Active_MQ" doc:name="JMS">
+            <jms:transaction action="ALWAYS_BEGIN"/>
+        </jms:outbound-endpoint>
+        <logger message="--message payload--#[payload]----" level="DEBUG" doc:name="Logger"/>
+        <catch-exception-strategy doc:name="Catch Exception Strategy">
+            <logger message="-- Error Sending File to JMS --" level="ERROR" doc:name="Logger"/>
+        </catch-exception-strategy>
+    </flow>
+</mule>
